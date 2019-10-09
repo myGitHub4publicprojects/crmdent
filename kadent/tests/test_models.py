@@ -14,7 +14,13 @@ from kadent.models import Patient, Visit, Image
 
 class TestPatient(TestCase):
     def test_patient_full_name(self):
-        p = mixer.blend('kadent:Patient',
+        p = mixer.blend('kadent.Patient',
                         first_name = 'Olo',
                         last_name = 'Smith')
         self.assertEqual(p.full_name(), 'Olo Smith')
+
+    def test_patient_str(self):
+        p = mixer.blend('kadent.Patient',
+                        first_name='Olo',
+                        last_name='Smith')
+        self.assertEqual(str(p), 'Olo Smith')

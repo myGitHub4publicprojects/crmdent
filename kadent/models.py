@@ -9,7 +9,7 @@ class Patient(models.Model):
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(null=True, blank=True)
 
@@ -19,12 +19,13 @@ class Patient(models.Model):
     def get_absolute_url(self):
         return reverse('kadent:patient_edit', kwargs={'pk': self.pk})
 
-    def str(self):
+    def __str__(self):
         return self.full_name()
 
 class Visit(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
 
@@ -39,10 +40,10 @@ class Image(models.Model):
         upload_to='documents/', validators=[accepted_extensions, accepted_size])
     note = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     visit = models.ForeignKey(
-        Patient, on_delete=models.SET_NULL, null=True, blank=True)
+        Visit, on_delete=models.SET_NULL, null=True, blank=True)
 
 
     def get_absolute_url(self):
