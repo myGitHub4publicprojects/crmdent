@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.conf import settings
-from django.core.urlresolvers import reverse
-
+from django.urls import reverse
 
 from .validators import accepted_extensions, accepted_size
 
 class Patient(models.Model):
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(null=True, blank=True)
 
@@ -23,7 +24,7 @@ class Patient(models.Model):
 
 class Visit(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(settings.AUTH_USER_MODEL)
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
     timestamp = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
 
@@ -34,10 +35,11 @@ class Visit(models.Model):
 
 class Image(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(
+    file = models.ImageField(
         upload_to='documents/', validators=[accepted_extensions, accepted_size])
     note = models.TextField(null=True, blank=True)
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     visit = models.ForeignKey(
         Patient, on_delete=models.SET_NULL, null=True, blank=True)
