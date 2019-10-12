@@ -1,0 +1,4 @@
+<form method="post">{% csrf_token %}
+    <p>Potwierdź usunięcie pacjenta:  "{{ object }}"?</p>
+    <input type="submit" value="Potwierdzam">
+</form>

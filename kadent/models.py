@@ -22,6 +22,7 @@ class Patient(models.Model):
     def __str__(self):
         return self.full_name()
 
+
 class Visit(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(
@@ -31,7 +32,6 @@ class Visit(models.Model):
 
     def get_absolute_url(self):
         return reverse('kadent:visit_detail', kwargs={'pk': self.pk})
-
 
 
 class Image(models.Model):
@@ -44,7 +44,6 @@ class Image(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     visit = models.ForeignKey(
         Visit, on_delete=models.SET_NULL, null=True, blank=True)
-
 
     def get_absolute_url(self):
         return reverse('kadent:image_detail', kwargs={'pk': self.pk})
