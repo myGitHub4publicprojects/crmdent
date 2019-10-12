@@ -31,7 +31,7 @@ class Visit(models.Model):
     note = models.TextField(null=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('kadent:visit_detail', kwargs={'pk': self.pk})
+        return reverse('kadent:visit_edit', kwargs={'pk': self.pk})
 
 
 class Image(models.Model):

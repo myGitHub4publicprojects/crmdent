@@ -1,4 +1,4 @@
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -33,3 +33,27 @@ class PatientDelete(LoginRequiredMixin, DeleteView):
 class PatientList(LoginRequiredMixin, ListView):
     model = Patient
     paginate_by = 50
+
+
+class VisitCreate(LoginRequiredMixin, CreateView):
+    model = Visit
+    fields = ['note']
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.doctor = self.request.user
+        obj.patient = Patient.objects.get(id=self.kwargs['pk'])
+        return super(VisitCreate, self).form_valid(form)
+
+class VisitUpdate(LoginRequiredMixin, UpdateView):
+    model = Visit
+    fields = ['note']
+    template_name_suffix = '_update_form'
+    def get_initial(self):
+        return {'note': self.object.note}
+
+
+class VisitDelete(LoginRequiredMixin, DeleteView):
+    model = Visit
+    def get_success_url(self):
+        return reverse('kadent:patient_edit', args=(self.object.patient.id,))

@@ -25,10 +25,12 @@ today = datetime.today().date()
 now = datetime.now()
 
 
-class TestCreteView(TestCase):
+class MyTestCase(TestCase):
     def setUp(self):
         User.objects.create_user(username='john', password='glassonion')
 
+
+class TestCreteView(MyTestCase):
     def test_anonymous(self):
         url = reverse('kadent:patient_create')
         expected_url = reverse('login') + '?next=/patient_create'
@@ -56,10 +58,9 @@ class TestCreteView(TestCase):
         self.assertEqual(patients.count(), 1)
         self.assertEqual(patients.first().created_by.username, 'john')
 
-class TestPatientUpdate(TestCase):
-    def setUp(self):
-        User.objects.create_user(username='john', password='glassonion')
 
+class TestPatientUpdate(MyTestCase):
+    
     def test_anonymous(self):
         url = reverse('kadent:patient_edit', args=(1,))
         expected_url = reverse('login') + '?next=/1/patient_edit/'
@@ -90,3 +91,33 @@ class TestPatientUpdate(TestCase):
         self.assertEqual(patient.first_name, 'ć')
         self.assertEqual(patient.last_name, 'łź')
         self.assertEqual(patient.notes, 'ó')
+
+
+class VisitCreate(MyTestCase):
+    def test_anonymous(self):
+        url = reverse('kadent:visit_create', args=(1,))
+        expected_url = reverse('login') + '?next=/1/visit_create/'
+        response = self.client.post(url, follow=True)
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+
+
+    def test_create(self):
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient', first_name='A', last_name='B', notes='ąć')
+        url = reverse('kadent:visit_create', args=(1,))
+        expected_url = reverse('kadent:visit_edit', args=(1,))
+        data = {'note': 'ó'}
+        response = self.client.post(url, data, follow=True)
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+
+        v = Visit.objects.all()
+        # should create one Visit
+        self.assertEqual(v.count(), 1)
+        # Visit.doctor should be logged in user
+        self.assertEqual(v.first().doctor.username, 'john')
