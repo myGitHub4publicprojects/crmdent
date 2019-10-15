@@ -57,3 +57,23 @@ class VisitDelete(LoginRequiredMixin, DeleteView):
     model = Visit
     def get_success_url(self):
         return reverse('kadent:patient_edit', args=(self.object.patient.id,))
+
+
+class ImageCreate(LoginRequiredMixin, CreateView):
+    model = Image
+    fields = ['file', 'note']
+
+    def form_valid(self, form):
+        print('myform: ', form)
+        obj = form.save(commit=False)
+        obj.uploaded_by = self.request.user
+        obj.patient = Patient.objects.get(id=self.kwargs['pk'])
+        return super(ImageCreate, self).form_valid(form)
+
+class ImageUpdate(LoginRequiredMixin, UpdateView):
+    model = Image
+    fields = ['note']
+    template_name_suffix = '_update_form'
+
+    def get_initial(self):
+        return {'note': self.object.note}

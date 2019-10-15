@@ -10,3 +10,4 @@ htmlcov/
 local_settings.py
 crmdent/static/
 crmdent/tests/test_files
+media

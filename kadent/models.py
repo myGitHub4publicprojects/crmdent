@@ -46,5 +46,5 @@ class Image(models.Model):
         Visit, on_delete=models.SET_NULL, null=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('kadent:image_detail', kwargs={'pk': self.pk})
+        return reverse('kadent:image_edit', kwargs={'pk': self.pk})
 
