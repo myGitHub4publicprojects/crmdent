@@ -121,3 +121,15 @@ class VisitCreate(MyTestCase):
         self.assertEqual(v.count(), 1)
         # Visit.doctor should be logged in user
         self.assertEqual(v.first().doctor.username, 'john')
+
+
+class TestImageCreate(MyTestCase):
+    def test_image_08MB_jpg(self):
+        '''image has 0.8MB and extension = .jpg'''
+        pass
+
+
+        # self.assertEqual(s.file.name, '08MB.jpg')
+
+        # # filename should be '08MB.jpg'
+        # self.assertEqual(os.path.basename(s.file.name), '08MB.jpg')

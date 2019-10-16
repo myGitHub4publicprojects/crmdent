@@ -4,6 +4,7 @@ import pytest
 import shutil
 import tempfile
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 from django.conf import settings
 from django.test import TestCase
@@ -27,50 +28,73 @@ class TestPatient(TestCase):
 
 
 class Test_Image(TestCase):
-    def setUp(self):
-        self.test_dir = tempfile.mkdtemp(dir=settings.BASE_DIR)
-        settings.MEDIA_ROOT = self.test_dir
-
-        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
-        os.mkdir(self.test_dir + '/xxx')
-        shutil.copyfile(src, self.test_dir + '/xxx/08MB.jpg')
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_dir = tempfile.mkdtemp(dir=settings.BASE_DIR)
+        settings.MEDIA_ROOT = cls.test_dir
 
 
-    # def test_with_empty_file(self):
-    #     '''the test file is empty - should not be allowed'''
+    @classmethod
+    def tearDownClass(cls):
+        # Remove the directory after the test
+        shutil.rmtree(cls.test_dir)
 
-    #     # create object
-        # f = File(open(
-        #     self.test_dir + '/xxx/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-        # s = mixer.blend('kadent.Image', file=f)
 
-    #     # validate
-    #     s.full_clean()
+    def test_with_empty_file(self):
+        '''the test file size is under 1kb - should not be allowed'''
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create object
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        s = mixer.blend('kadent.Image', file=f)
 
-    #     # filename should be 'empty.xls'
-    #     self.assertEqual(s.filename(), 'empty.jpg')
+        self.assertRaises(ValidationError, s.full_clean)
+
 
     def test_with_file(self):
         '''should create an Image object with a file field'''
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/08MB.jpg')
+
+        p = mixer.blend('kadent.Patient')
+        u = User.objects.create_user(username='john', password='glassonion')
         # create object
         f = File(open(
-            self.test_dir + '/xxx/08MB.jpg', 'rb')) # use 'rb' to read as bytes, no decoding
-        s = mixer.blend('kadent.Image', file=f)
+            self.test_dir + '/08MB.jpg', 'rb')) # use 'rb' to read as bytes, no decoding
+        s = Image.objects.create(
+            file=f,
+            note='some note',
+            uploaded_by=u,
+            patient=p,
+        )
+        # validate
+        s.full_clean()
 
-
-        self.assertEqual(s.file.name, '08MB.jpg')
-
-        # filename should be '08MB.jpg'
-        self.assertEqual(os.path.basename(s.file.name), '08MB.jpg')
+        i = Image.objects.all()
+        self.assertTrue(i.exists())
+        self.assertEqual(i.count(), 1)
+        self.assertEqual(i.first().note, 'some note')
         
 
-    # def test_with_oversided_file(self):
-    # pass
+    def test_with_oversided_file(self):
+        src = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/30MB.jpg')
+        # create object
+        f = File(open(
+            self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        s = mixer.blend('kadent.Image', file=f)
 
-    # def test_with_unaccepted_extensions(self):
-    #     pass
+        self.assertRaises(ValidationError, s.full_clean)
 
-    def tearDown(self):
-        # Remove the directory after the test
-        shutil.rmtree(self.test_dir)
+    def test_with_unaccepted_extensions(self):
+        '''.txt file should not be allowed'''
+        src = os.getcwd() + '/kadent/tests/test_files/1.txt'
+        shutil.copyfile(src, self.test_dir + '/1.txt')
+        # create object
+        f = File(open(
+            self.test_dir + '/1.txt', 'rb'))  # use 'rb' to read as bytes, no decoding
+        s = mixer.blend('kadent.Image', file=f)
+
+        self.assertRaises(ValidationError, s.full_clean)

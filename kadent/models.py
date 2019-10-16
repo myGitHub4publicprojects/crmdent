@@ -2,8 +2,9 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.core.validators import FileExtensionValidator
 
-from .validators import accepted_extensions, accepted_size
+from .validators import accepted_size
 
 class Patient(models.Model):
     first_name = models.CharField(max_length=120)
@@ -37,7 +38,9 @@ class Visit(models.Model):
 class Image(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.ImageField(
-        upload_to='documents/', validators=[accepted_extensions, accepted_size])
+        upload_to='documents/',
+        validators=[accepted_size,
+                    FileExtensionValidator(allowed_extensions=['jpg', 'png'])])
     note = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
