@@ -22,7 +22,10 @@ urlpatterns = [
          views.VisitDelete.as_view(), name='visit_delete'),
 
      # Image
-    path('<int:pk>/image_create/', views.ImageCreate.as_view(), name='image_create'),
+    path('<int:pk>/image_create_from_patient/',
+         views.ImageCreateFromPatient.as_view(), name='image_create_from_patient'),
+    path('<int:pk>/image_create_from_visit/',
+         views.ImageCreateFromPatient.as_view(), name='image_create_from_visit'),
     path('<int:pk>/image_edit/',
          views.ImageUpdate.as_view(), name='image_edit'),
 ]

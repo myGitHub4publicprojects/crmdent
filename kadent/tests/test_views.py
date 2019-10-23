@@ -30,7 +30,7 @@ class MyTestCase(TestCase):
         User.objects.create_user(username='john', password='glassonion')
 
 
-class TestCreteView(MyTestCase):
+class TestPatientCreteView(MyTestCase):
     def test_anonymous(self):
         url = reverse('kadent:patient_create')
         expected_url = reverse('login') + '?next=/patient_create'
@@ -123,13 +123,80 @@ class VisitCreate(MyTestCase):
         self.assertEqual(v.first().doctor.username, 'john')
 
 
-class TestImageCreate(MyTestCase):
+class TestImageCreateFromPatient(MyTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_dir = tempfile.mkdtemp(dir=settings.BASE_DIR)
+        settings.MEDIA_ROOT = cls.test_dir
+
+    @classmethod
+    def tearDownClass(cls):
+        # Remove the directory after the test
+        shutil.rmtree(cls.test_dir)
+
+
     def test_image_08MB_jpg(self):
         '''image has 0.8MB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/08MB.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+
+        url = reverse('kadent:image_create_from_patient', args=(1,))
+        expected_url = reverse('kadent:image_edit', args=(1,))
+        data = {'file': f, 'note': 'test notęŁ'}
+        response = self.client.post(url, data, follow=True)
+
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        self.assertEqual(images.count(), 1)
+        self.assertEqual(images.first().note, 'test notęŁ')
+
+
+class TestImageCreateFromVisit(TestImageCreateFromPatient):
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_dir = tempfile.mkdtemp(dir=settings.BASE_DIR)
+        settings.MEDIA_ROOT = cls.test_dir
+
+    @classmethod
+    def tearDownClass(cls):
+        # Remove the directory after the test
+        shutil.rmtree(cls.test_dir)
+
+    def test_image_08MB_jpg(self):
+        '''image has 0.8MB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        mixer.blend('kadent.Visit')
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/08MB.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+
+        url = reverse('kadent:image_create_from_visit', args=(1,))
+        expected_url = reverse('kadent:image_edit', args=(1,))
+        data = {'file': f, 'note': 'test notęŁ'}
+        response = self.client.post(url, data, follow=True)
+
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        self.assertEqual(images.count(), 1)
+        self.assertEqual(images.first().note, 'test notęŁ')
+
+
+class TestImageDelete(MyTestCase):
+    def test_img(self):
+                # message = 'Usunięto obraz'
         pass
-
-
-        # self.assertEqual(s.file.name, '08MB.jpg')
-
-        # # filename should be '08MB.jpg'
-        # self.assertEqual(os.path.basename(s.file.name), '08MB.jpg')

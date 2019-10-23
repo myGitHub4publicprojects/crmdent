@@ -2,3 +2,5 @@
     {{ form.as_p }}
     <input type="submit" value="Zapisz">
 </form>
+
+<a href="{% url 'kadent:image_create_from_patient' object.id %}">Dodaj obraz do pacjenta</a>

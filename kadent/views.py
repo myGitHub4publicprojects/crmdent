@@ -59,16 +59,27 @@ class VisitDelete(LoginRequiredMixin, DeleteView):
         return reverse('kadent:patient_edit', args=(self.object.patient.id,))
 
 
-class ImageCreate(LoginRequiredMixin, CreateView):
+class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
+    '''Create Image object when request send from PatientUpdate view'''
     model = Image
     fields = ['file', 'note']
 
     def form_valid(self, form):
-        print('myform: ', form)
         obj = form.save(commit=False)
         obj.uploaded_by = self.request.user
         obj.patient = Patient.objects.get(id=self.kwargs['pk'])
-        return super(ImageCreate, self).form_valid(form)
+        return super(ImageCreateFromPatient, self).form_valid(form)
+
+class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
+    '''Create Image object when request send from VisitUpdate view'''
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.uploaded_by = self.request.user
+        visit = Visit.objects.get(id=self.kwargs['pk'])
+        obj.visit = visit
+        obj.patient = visit.patient
+        return super(ImageCreateFromVisit, self).form_valid(form)
 
 class ImageUpdate(LoginRequiredMixin, UpdateView):
     model = Image
