@@ -1,5 +1,10 @@
+{% extends "kadent/base.html" %}
+{% load static %}
+
+{% block content %}
 <form method="post">{% csrf_token %}
     <p>Potwierdź usunięcie wizyty pacjenta {{ object.patient }}, z dnia {{ object.timestamp }} 
         zapisanej przez: {{ object.doctor }}</p>
     <input type="submit" value="Potwierdzam">
 </form>
+{% endblock content %}

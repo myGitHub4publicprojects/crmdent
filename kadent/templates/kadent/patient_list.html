@@ -1,3 +1,7 @@
+{% extends "kadent/base.html" %}
+{% load static %}
+
+{% block content %}
 <h1>Pacjenci</h1>
 <ul>
     {% for patient in object_list %}
@@ -6,3 +10,4 @@
     <li>Nie ma jeszcze pacjentów.</li>
     {% endfor %}
 </ul>
+{% endblock content %}
