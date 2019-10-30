@@ -2,8 +2,47 @@
 {% load static %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">{% csrf_token %}
+<!-- <form method="post" enctype="multipart/form-data">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Zapisz">
-</form>
+</form> -->
+
+
+<button type="button" class="btn btn-primary js-upload-photos">
+    <span class="glyphicon glyphicon-cloud-upload"></span> Upload photos
+</button>
+
+<!-- FILE INPUT TO BE USED BY THE jq PLUG-IN -->
+<input id="fileupload" type="file" name="file" multiple style="display: none;"
+    data-url="{% url 'kadent:image_create_from_patient' 3 %}" data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+
+<!-- TABLE TO DISPLAY THE UPLOADED PHOTOS -->
+<table id="gallery" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Photo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for photo in photos %}
+        <tr>
+            <td><a href="{{ photo.file.url }}">{{ photo.file.name }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
 {% endblock content %}
+
+{% block javascript %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- JQUERY FILE UPLOAD SCRIPTS -->
+<script src="{% static 'kadent/scripts/jquery-file-upload/js/vendor/jquery.ui.widget.js' %}"></script>
+<script src="{% static 'kadent/scripts/jquery-file-upload/js/jquery.iframe-transport.js' %}"></script>
+<script src="{% static 'kadent/scripts/jquery-file-upload/js/jquery.fileupload.js' %}"></script>
+
+<!-- PHOTOS PAGE SCRIPTS -->
+<script src="{% static 'kadent/scripts/basic-upload.js' %}"></script>
+{% endblock %}
