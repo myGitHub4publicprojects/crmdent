@@ -71,10 +71,12 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
         photos_list = Image.objects.all()
         return render(self.request, 'kadent/image_form.html', {'photos': photos_list})
 
-    def post(self, request):
+    def post(self, request, pk):
         form = PhotoForm(self.request.POST, self.request.FILES)
         if form.is_valid():
-            photo = form.save()
+            photo = form.save(commit=False)
+            photo.patient = Patient.objects.get(pk=pk)
+            photo.save()
             data = {'is_valid': True, 'name': photo.file.name,
                     'url': photo.file.url}
         else:
