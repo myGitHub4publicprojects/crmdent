@@ -4,7 +4,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
-from kadent.forms import PhotoForm
 from django.http import JsonResponse
 
 
@@ -64,24 +63,36 @@ class VisitDelete(LoginRequiredMixin, DeleteView):
 
 class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from PatientUpdate view'''
-    # model = Image
-    # fields = ['file',]
+    model = Image
+    fields = ['file',]
 
     def get(self, request, pk):
-        photos_list = Image.objects.all()
+        photos_list = Image.objects.filter(patient=Patient.objects.get(pk=pk))
         return render(self.request, 'kadent/image_form.html', {'photos': photos_list})
 
-    def post(self, request, pk):
-        form = PhotoForm(self.request.POST, self.request.FILES)
-        if form.is_valid():
-            photo = form.save(commit=False)
-            photo.patient = Patient.objects.get(pk=pk)
-            photo.save()
-            data = {'is_valid': True, 'name': photo.file.name,
-                    'url': photo.file.url}
-        else:
-            data = {'is_valid': False}
+    def form_valid(self, form, *args, **kwargs):
+        photo = form.save(commit=False)
+        pk = self.kwargs.get('pk')
+        photo.patient = Patient.objects.get(pk=pk)
+        photo.save()
+        data = {'is_valid': True, 'name': photo.file.name,
+                        'url': photo.file.url}
         return JsonResponse(data)
+
+    def form_invalid(self, form):
+        return JsonResponse({'is_valid': False})
+
+    # def post(self, request, pk):
+    #     form = PhotoForm(self.request.POST, self.request.FILES)
+    #     if form.is_valid():
+    #         photo = form.save(commit=False)
+    #         photo.patient = Patient.objects.get(pk=pk)
+    #         photo.save()
+    #         data = {'is_valid': True, 'name': photo.file.name,
+    #                 'url': photo.file.url}
+    #     else:
+    #         data = {'is_valid': False}
+    #     return JsonResponse(data)
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from VisitUpdate view'''
