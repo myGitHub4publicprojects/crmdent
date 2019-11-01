@@ -69,6 +69,10 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
         obj.uploaded_by = self.request.user
         obj.patient = Patient.objects.get(id=self.kwargs['pk'])
         return super(ImageCreateFromPatient, self).form_valid(form)
+    
+    def get_success_url(self):
+        patient = Patient.objects.get(id=self.kwargs['pk'])
+        return reverse('kadent:patient_edit', args=(patient.id,))
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from VisitUpdate view'''
@@ -80,6 +84,10 @@ class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
         obj.visit = visit
         obj.patient = visit.patient
         return super(ImageCreateFromVisit, self).form_valid(form)
+
+    def get_success_url(self):
+        visit = Visit.objects.get(id=self.kwargs['pk'])
+        return reverse('kadent:visit_edit', args=(visit.id,))
 
 class ImageUpdate(LoginRequiredMixin, UpdateView):
     model = Image
