@@ -7,13 +7,26 @@
     <input type="submit" value="Zapisz">
 </form>
 
+<h2>Wizyty</h2>
+<ul>
+    {% for visit in visits %}
+    <li>{{ visit.timestamp|date:'d.m.Y H:i' }}, {{ visit.note }}, doktor: {{ visit.doctor }}</li>
+    {% empty %}
+    Nie ma jeszcze wizyt
+    {% endfor %}
+</ul>
+
 <h2>Obrazy</h2>
 <ul>
-{% for image in images %}
-<li>{{ image.file.name }} dodany: {{ image.uploaded_at }}. {{ image.note }}</li>
-{% empty %}
-Nie ma jeszcze obrazów
-{% endfor %}
+    {% for image in images %}
+    <li>
+        <a href="{% url 'kadent:image_edit' image.id %}">{{ image.file.name }}</a>
+         dodany: {{ image.uploaded_at|date:'d.m.Y H:i' }}. {{ image.note }}
+    </li>
+    {% empty %}
+    Nie ma jeszcze obrazów
+    {% endfor %}
 </ul>
+
 <a href="{% url 'kadent:image_create_from_patient' object.id %}">Dodaj obraz do pacjenta</a>
 {% endblock content %}
