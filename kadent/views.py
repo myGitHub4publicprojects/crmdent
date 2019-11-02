@@ -26,6 +26,11 @@ class PatientUpdate(LoginRequiredMixin, UpdateView):
                 'last_name': self.object.last_name,
                 'notes': self.object.notes}
 
+    def get_context_data(self, **kwargs):
+        context = super(PatientUpdate, self).get_context_data(**kwargs)
+        context['images'] = Image.objects.filter(patient=self.object)
+        return context
+
 
 class PatientDelete(LoginRequiredMixin, DeleteView):
     model = Patient

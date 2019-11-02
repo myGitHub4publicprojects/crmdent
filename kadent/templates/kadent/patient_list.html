@@ -5,7 +5,9 @@
 <h1>Pacjenci</h1>
 <ul>
     {% for patient in object_list %}
-    <li>{{ patient }}</li>
+    <li>
+        <a href="{% url 'kadent:patient_edit' patient.id %}">{{ patient }}</a>
+    </li>
     {% empty %}
     <li>Nie ma jeszcze pacjentów.</li>
     {% endfor %}
