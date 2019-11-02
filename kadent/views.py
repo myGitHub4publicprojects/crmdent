@@ -4,8 +4,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
-from .forms import ImageCreateForm
-
 
 class PatientCreate(LoginRequiredMixin, CreateView):
     model = Patient
