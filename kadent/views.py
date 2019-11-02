@@ -1,8 +1,10 @@
 from django.urls import reverse, reverse_lazy
+from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
+from .forms import ImageCreateForm
 
 
 class PatientCreate(LoginRequiredMixin, CreateView):
@@ -64,15 +66,17 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     model = Image
     fields = ['file', 'note']
 
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.uploaded_by = self.request.user
-        obj.patient = Patient.objects.get(id=self.kwargs['pk'])
-        return super(ImageCreateFromPatient, self).form_valid(form)
-    
-    def get_success_url(self):
+    def post(self, request, *args, **kwargs):
         patient = Patient.objects.get(id=self.kwargs['pk'])
-        return reverse('kadent:patient_edit', args=(patient.id,))
+        for file in request.FILES.getlist('images'):
+            Image.objects.create(
+                uploaded_by=self.request.user,
+                note=request.POST.get('name'),
+                file=file,
+                patient=patient
+            )
+        return redirect('kadent:patient_edit', patient.id)
+
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from VisitUpdate view'''
