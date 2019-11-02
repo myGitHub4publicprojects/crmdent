@@ -1,9 +1,12 @@
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
+from .validators import validate_extension, validate_size
 
 class PatientCreate(LoginRequiredMixin, CreateView):
     model = Patient
@@ -73,6 +76,20 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         patient = Patient.objects.get(id=self.kwargs['pk'])
         for file in request.FILES.getlist('images'):
+            # validate file extension
+            if not validate_extension(file):
+                messages.error(request, 
+                    '''Próbujesz dodać plik z niewłaściwym rozszerzeniem: {0}.
+                 Akceptowane rozszerzenia: {1}'''.format(file.name,
+                    settings.ACCEPTED_EXTENSIONS))
+                return redirect('kadent:patient_edit', patient.id)
+
+            # validate file size
+            valid_size = validate_size(file)
+            if valid_size != True:
+                messages.error(request, valid_size)
+                return redirect('kadent:patient_edit', patient.id)
+            # validate note
             Image.objects.create(
                 uploaded_by=self.request.user,
                 note=request.POST.get('note'),
