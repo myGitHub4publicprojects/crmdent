@@ -10,7 +10,7 @@
 <h2>Obrazy</h2>
 <ul>
 {% for image in images %}
-<li>{{ image.file.name }} dodany: {{ image.uploaded_at }}</li>
+<li>{{ image.file.name }} dodany: {{ image.uploaded_at }}. {{ image.note }}</li>
 {% empty %}
 Nie ma jeszcze obrazów
 {% endfor %}

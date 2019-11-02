@@ -3,7 +3,6 @@
 
 {% block content %}
 <form method="post" enctype="multipart/form-data">{% csrf_token %}
-    <!-- {{ form.as_p }} -->
     <p>
         <label for="id_file">File:</label>
         <input type="file" name="images" required="" accept="image/*" id="id_file" multiple>

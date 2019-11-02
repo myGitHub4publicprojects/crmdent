@@ -76,7 +76,7 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
         for file in request.FILES.getlist('images'):
             Image.objects.create(
                 uploaded_by=self.request.user,
-                note=request.POST.get('name'),
+                note=request.POST.get('note'),
                 file=file,
                 patient=patient
             )
