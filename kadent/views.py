@@ -6,7 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
-from .validators import validate_extension, validate_size
+from .forms import ImageFormSet
+
 
 class PatientCreate(LoginRequiredMixin, CreateView):
     model = Patient
@@ -71,31 +72,30 @@ class VisitDelete(LoginRequiredMixin, DeleteView):
 class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from PatientUpdate view'''
     model = Image
-    fields = ['file', 'note']
+    fields = ['note', 'file']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['formset'] = ImageFormSet(queryset=Image.objects.none())
+        return context
 
     def post(self, request, *args, **kwargs):
-        patient = Patient.objects.get(id=self.kwargs['pk'])
-        for file in request.FILES.getlist('images'):
-            # validate file extension
-            if not validate_extension(file):
-                messages.error(request, 
-                    '''Próbujesz dodać plik z niewłaściwym rozszerzeniem: {0}.
-                 Akceptowane rozszerzenia: {1}'''.format(file.name,
-                    settings.ACCEPTED_EXTENSIONS))
-                return redirect('kadent:patient_edit', patient.id)
+        formset = ImageFormSet(self.request.POST, self.request.FILES)
+        if formset.is_valid():
+            return self.form_valid(formset)
+        else:
+            for errors_dicts in formset.errors:
+                for val in errors_dicts.values():
+                    messages.error(request, val[0])
+            return redirect('kadent:image_create_from_patient', self.kwargs['pk'])
 
-            # validate file size
-            valid_size = validate_size(file)
-            if valid_size != True:
-                messages.error(request, valid_size)
-                return redirect('kadent:patient_edit', patient.id)
-            # validate note
-            Image.objects.create(
-                uploaded_by=self.request.user,
-                note=request.POST.get('note'),
-                file=file,
-                patient=patient
-            )
+    def form_valid(self, form, **kwargs):
+        patient = Patient.objects.get(id=self.kwargs['pk'])
+        instances = form.save(commit=False)
+        for instance in instances:
+            instance.uploaded_by = self.request.user
+            instance.patient = patient
+        form.save()
         return redirect('kadent:patient_edit', patient.id)
 
 

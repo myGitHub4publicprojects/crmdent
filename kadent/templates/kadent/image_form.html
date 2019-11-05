@@ -2,15 +2,16 @@
 {% load static %}
 
 {% block content %}
+<ul>
+    {% for message in messages %}
+    <li><h1>{{ message }}</h1></li>
+    {% endfor %}
+</ul>
+
 <form method="post" enctype="multipart/form-data">{% csrf_token %}
-    <p>
-        <label for="id_file">File:</label>
-        <input type="file" name="images" required="" accept="image/*" id="id_file" multiple>
-    </p>
-    <p>
-        <label for="id_note">Note:</label>
-        <textarea name="note" cols="40" id="id_note" rows="10"></textarea>
-    </p>
+
+    {{ formset }}
+
     <input type="submit" value="Zapisz">
 </form>
 {% endblock content %}
