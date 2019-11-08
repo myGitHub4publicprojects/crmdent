@@ -9,22 +9,23 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'kadent/style.css' %}" />
     {% block scripts %}
-
     {% endblock scripts %}
     <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
+{% include "kadent/navbar.html" %}
+    <main role="main" class="container">
     <div class="container-fluid">
         {% block content %}
-
         {% endblock content %}
 
         {% block javascript %}
         {% endblock %}
     </div>
+    </main>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>

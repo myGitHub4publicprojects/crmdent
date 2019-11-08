@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block content %}
+{% for message in messages %}
+{{ message|safe }}
+{% endfor %}
 <form method="post" enctype="multipart/form-data">{% csrf_token %}
     <p>
         <label for="id_file">File:</label>

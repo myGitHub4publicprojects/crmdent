@@ -6,30 +6,77 @@
 <h1>{{ message }}</h1>
 {% endfor %}
 <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Zapisz">
+<p class="mt-2">
+    <span>
+    {{ form.first_name.errors }}
+    {{ form.first_name.label_tag }}
+    {{ form.first_name }}
+    </span>
+    <span>
+        {{ form.last_name.errors }}
+        {{ form.last_name.label_tag }}
+        {{ form.last_name }}
+    </span>
+</p>
+<p>
+    {{ form.notes.errors }}
+    {{ form.notes.label_tag }}
+    {{ form.notes }}
+</p>
+<input type="submit" value="Zapisz zmiany">
 </form>
 
-<h2>Wizyty</h2>
-<ul>
-    {% for visit in visits %}
-    <li>{{ visit.timestamp|date:'d.m.Y H:i' }}, {{ visit.note }}, doktor: {{ visit.doctor }}</li>
-    {% empty %}
-    Nie ma jeszcze wizyt
-    {% endfor %}
-</ul>
+<h3 class="text-center">Wizyty</h3>
+<table class="table table-hover table-dark">
+    <thead>
+        <tr>
+            <th scope="col">czas</th>
+            <th scope="col">notatka</th>
+            <th scope="col">doktor</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for visit in visits %}
+        <tr>
+            <td><a href="{% url 'kadent:visit_edit' visit.id %}">{{ visit.timestamp|date:'d.m.Y H:i' }}</a></td>
+            <td><a href="{% url 'kadent:visit_edit' visit.id %}">{{ visit.note }}</a></td>
+            <td><a href="{% url 'kadent:visit_edit' visit.id %}">{{ visit.doctor }}</a></td>
+        </tr>
+        {% endfor %}
 
-<h2>Obrazy</h2>
-<ul>
-    {% for image in images %}
-    <li>
-        <a href="{% url 'kadent:image_edit' image.id %}">{{ image.file.name }}</a>
-         dodany: {{ image.uploaded_at|date:'d.m.Y H:i' }}. {{ image.note }}
-    </li>
-    {% empty %}
-    Nie ma jeszcze obrazów
-    {% endfor %}
-</ul>
+    </tbody>
+</table>
+<a href="{% url 'kadent:visit_create' object.id %}">
+    <button class="btn btn-small btn-primary">Dodaj wizytę do pacjenta</button>
+</a>
 
-<a href="{% url 'kadent:image_create_from_patient' object.id %}">Dodaj obraz do pacjenta</a>
+<hr>
+
+<h3 class="text-center">Obrazy</h3>
+<table class="table table-hover table-dark">
+    <thead>
+        <tr>
+            <th scope="col">nazwa pliku</th>
+            <th scope="col">dodany</th>
+            <th scope="col">notatka</th>
+            <th scope="col">dodany przez</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for image in images %}
+        <tr>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.file.name }}</a></td>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_at|date:'d.m.Y H:i' }}</a></td>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.note }}</a></td>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_by }}</a></td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+<a href="{% url 'kadent:image_create_from_patient' object.id %}">
+    <button class="btn btn-small btn-primary">Dodaj obraz do pacjenta</button>
+</a>
+
 {% endblock content %}

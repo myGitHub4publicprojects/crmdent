@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
-from .validators import validate_extension, validate_size
+from .forms import ImageForm, PatientForm
 
 class PatientCreate(LoginRequiredMixin, CreateView):
     model = Patient
@@ -20,7 +20,7 @@ class PatientCreate(LoginRequiredMixin, CreateView):
 
 class PatientUpdate(LoginRequiredMixin, UpdateView):
     model = Patient
-    fields = ['first_name', 'last_name', 'notes']
+    form_class = PatientForm
     template_name_suffix = '_update_form'
     def get_initial(self):
         return {'first_name': self.object.first_name,
@@ -71,32 +71,44 @@ class VisitDelete(LoginRequiredMixin, DeleteView):
 class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from PatientUpdate view'''
     model = Image
-    fields = ['file', 'note']
+    form_class = ImageForm
 
     def post(self, request, *args, **kwargs):
+        no_errors = True
+        instances = []
         patient = Patient.objects.get(id=self.kwargs['pk'])
-        for file in request.FILES.getlist('images'):
-            # validate file extension
-            if not validate_extension(file):
-                messages.error(request, 
-                    '''Próbujesz dodać plik z niewłaściwym rozszerzeniem: {0}.
-                 Akceptowane rozszerzenia: {1}'''.format(file.name,
-                    settings.ACCEPTED_EXTENSIONS))
-                return redirect('kadent:patient_edit', patient.id)
-
-            # validate file size
-            valid_size = validate_size(file)
-            if valid_size != True:
-                messages.error(request, valid_size)
-                return redirect('kadent:patient_edit', patient.id)
-            # validate note
-            Image.objects.create(
-                uploaded_by=self.request.user,
-                note=request.POST.get('note'),
-                file=file,
-                patient=patient
-            )
-        return redirect('kadent:patient_edit', patient.id)
+        for img in request.FILES.getlist('images'):
+            request.FILES['file'] = img
+            form = ImageForm(request.POST, request.FILES)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instances.append(instance)
+            else:
+                # when first error occures add info message and set no_errors to False
+                if no_errors == True:
+                    no_errors = False
+                    messages.info(
+                        request,
+                        '''<div class="alert alert-danger" role="alert">
+                            <h2 class="text-center">Obrazy nie zostały zapisane!</h2>
+                            <h3>Wystąpiły następujące błędy:</h3>
+                        </div>'''
+                        )
+                messages.error(
+                    request, 
+                    '<div class="alert alert-danger" role="alert">{0}</div>'.format(
+                        str(form.errors))
+                    )
+        
+        # save to db only if there were no errors in any of the files 
+        if no_errors:
+            for instance in instances:
+                instance.created_by = request.user
+                instance.patient = patient
+                instance.save()
+            return redirect('kadent:patient_edit', patient.id)
+        else:
+            return redirect('kadent:image_create_from_visit', patient.id)
 
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
