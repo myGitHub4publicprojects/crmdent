@@ -80,7 +80,15 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        counter = 0
+        request.POST = request.POST.copy()
+        for img in request.FILES.getlist('images'):
+            request.FILES['form-{0}-file'.format(counter)] = img
+            note = request.POST[img.name]
+            request.POST['form-{0}-note'.format(counter)] = note
+            counter += 1
         formset = ImageFormSet(self.request.POST, self.request.FILES)
+
         if formset.is_valid():
             return self.form_valid(formset)
         else:

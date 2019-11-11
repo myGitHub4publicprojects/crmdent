@@ -10,14 +10,8 @@
 
 <form id="fset" method="post" enctype="multipart/form-data">{% csrf_token %}
     {{ formset.management_form }}
-    <!-- <label for="id_form-0-file">File:</label>
-    <input type="file" name="form-0-file" accept="image/*" id="id_form-0-file">
-
-    <label for="id_form-0-note">Note:</label>
-    <textarea name="form-0-note" cols="40" id="id_form-0-note" rows="3"></textarea> -->
-
-    <input type="file" name="form-0-file" accept="image/*" id="multiFileBtn" multiple>
-
+    <input type="file" name="images" accept="image/*" id="multiFileBtn" multiple>
+    <div id="output"></div>
     <input type="submit" value="Zapisz">
 </form>
 {% endblock content %}
@@ -26,30 +20,24 @@
 <script>
 var multiFileBtn = document.getElementById('multiFileBtn');
 var fset = document.getElementById('fset');
+var totalForms = document.getElementById('id_form-TOTAL_FORMS');
+var output = document.getElementById('output');
 
-multiFileBtn.addEventListener('change', printFiles);
 
-function printFiles(){
-    // console.log(multiFileBtn);
-    for (let i of multiFileBtn.files) {
-        console.log(i);
-        
-        // create form element (label and input for 'Note' and 'File')
-        var fileLabel = '<label for="id_form-0-file">File:</label>';
-        var fileInput = document.createElement('INPUT');
-        fileInput.outerHTML = '<input type="file" name="form-0-file" accept="image/*" id="id_form-0-file">';
-        fileInput.type = 'file';
-        var noteLabel = '<label for="id_form-0-note">Note:</label>';
-        var noteInput = '<textarea name="form-0-note" cols="40" id="id_form-0-note" rows="3"></textarea>';
-            
-        // add file to fileInput
-        fileInput.value = i;           
-                
-        // append inputs to formset
-        fset.appendChild()
+multiFileBtn.addEventListener('change', ()=>{
+    totalForms.value = multiFileBtn.files.length;
+    for (let f of multiFileBtn.files){
+        var newP = document.createElement('p');
+        var newSpan = document.createElement('SPAN');
+        newSpan.innerText = f.name + ': ';
+        var newTextInput = document.createElement('INPUT');
+        newTextInput.type = 'text';
+        newTextInput.name = f.name;
+        newP.appendChild(newSpan);
+        newP.appendChild(newTextInput);
+        output.appendChild(newP);
     }
-}
-
+});
 
 </script>
 {% endblock %}
