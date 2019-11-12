@@ -255,6 +255,62 @@ class TestImageCreateFromPatient(MyTestCase):
         # second error should indicate the file and reason of failure
         expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
         self.assertEqual(messages[1].message, expected_error2)
+        
+
+    def test_two_unacceptable_files(self):
+        '''should not create, two files, 0.8kB and 30MB'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+
+        src2 = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
+        shutil.copyfile(src2, self.test_dir + '/30MB.jpg')
+        f2 = File(open(
+            self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        url = reverse('kadent:image_create_from_patient', args=(p.id,))
+        expected_url = reverse(
+            'kadent:image_create_from_patient', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+
+            # test data
+            'images': [f,f2 ],
+            'empty.jpg': 'test notęŁ',
+            '30MB.jpg': 'note for too large file'
+        }
+        response = self.client.post(url, data, follow=True)
+
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        # should redisplay image form
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        # should not create an Image
+        self.assertEqual(images.count(), 0)
+        # should display error messages
+        messages = list(get_messages(response.wsgi_request))
+        # there should be 3 error messages
+        self.assertEqual(len(messages), 3)
+        # first should indicate that there was an error
+        expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
+        self.assertEqual(messages[0].message, expected_error1)
+        # second error should indicate the file and reason of failure
+        expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
+        self.assertEqual(messages[1].message, expected_error2)
+        # third error should indicate the file and reason for failure
+        expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
+        self.assertEqual(messages[2].message, expected_error3)
+
 
 # class TestImageCreateFromVisit(TestImageCreateFromPatient):
 #     @classmethod
