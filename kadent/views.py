@@ -29,8 +29,10 @@ class PatientUpdate(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(PatientUpdate, self).get_context_data(**kwargs)
-        context['images'] = Image.objects.filter(patient=self.object)
-        context['visits'] = Visit.objects.filter(patient=self.object)
+        context['images'] = Image.objects.filter(
+            patient=self.object).order_by('-uploaded_at')
+        context['visits'] = Visit.objects.filter(
+            patient=self.object).order_by('-timestamp')
         return context
 
 
