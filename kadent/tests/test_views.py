@@ -211,6 +211,51 @@ class TestImageCreateFromPatient(MyTestCase):
         self.assertEqual(images.first().note, 'test notęŁ')
         self.assertEqual(images.last().note, '08MB2 test note')
 
+    def test_empty_file(self):
+        '''should not create, one file, 0.8kB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        url = reverse('kadent:image_create_from_patient', args=(p.id,))
+        expected_url = reverse(
+            'kadent:image_create_from_patient', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+
+            # test data
+            'images': [f, ],
+            'empty.jpg': 'test notęŁ'
+        }
+        response = self.client.post(url, data, follow=True)
+
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        # should redisplay image form
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        # should not create an Image
+        self.assertEqual(images.count(), 0)
+        # should display error messages
+        messages = list(get_messages(response.wsgi_request))
+        # there should be 2 error messages
+        self.assertEqual(len(messages), 2)
+        # first should indicate that there was an error
+        expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
+        self.assertEqual(messages[0].message, expected_error1)
+        # second error should indicate the file and reason of failure
+        expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
+        self.assertEqual(messages[1].message, expected_error2)
+
 # class TestImageCreateFromVisit(TestImageCreateFromPatient):
 #     @classmethod
 #     def setUpTestData(cls):

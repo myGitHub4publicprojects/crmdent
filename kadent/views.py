@@ -88,13 +88,21 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
             request.POST['form-{0}-note'.format(counter)] = note
             counter += 1
         formset = ImageFormSet(self.request.POST, self.request.FILES)
-
+        no_errors = True
+        alert_div = '<div class="alert alert-danger" role="alert">{0}</div>'
         if formset.is_valid():
             return self.form_valid(formset)
         else:
+            if no_errors:
+                messages.info(
+                    request, alert_div.format(
+                        '<h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3>'
+                    )
+                )
+                no_errors = False
             for errors_dicts in formset.errors:
                 for val in errors_dicts.values():
-                    messages.error(request, val[0])
+                    messages.error(request, alert_div.format(val[0]))
             return redirect('kadent:image_create_from_patient', self.kwargs['pk'])
 
     def form_valid(self, form, **kwargs):
