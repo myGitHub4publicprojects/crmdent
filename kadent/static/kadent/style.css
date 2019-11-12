@@ -1,0 +1,5 @@
+td a, td a:hover { 
+   display: block;
+   color: azure;
+   text-decoration: none;
+}

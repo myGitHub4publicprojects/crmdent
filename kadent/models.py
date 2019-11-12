@@ -50,4 +50,3 @@ class Image(models.Model):
 
     def get_absolute_url(self):
         return reverse('kadent:image_edit', kwargs={'pk': self.pk})
-

@@ -6,8 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from kadent.models import Patient, Visit, Image
-from .forms import ImageFormSet
-
+from .forms import ImageFormSet, PatientForm
 
 class PatientCreate(LoginRequiredMixin, CreateView):
     model = Patient
@@ -21,7 +20,7 @@ class PatientCreate(LoginRequiredMixin, CreateView):
 
 class PatientUpdate(LoginRequiredMixin, UpdateView):
     model = Patient
-    fields = ['first_name', 'last_name', 'notes']
+    form_class = PatientForm
     template_name_suffix = '_update_form'
     def get_initial(self):
         return {'first_name': self.object.first_name,
@@ -113,6 +112,7 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
             instance.patient = patient
         form.save()
         return redirect('kadent:patient_edit', patient.id)
+
 
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
