@@ -2,11 +2,9 @@
 {% load static %}
 
 {% block content %}
-<ul>
-    {% for message in messages %}
-    <li><h1>{{ message }}</h1></li>
-    {% endfor %}
-</ul>
+{% for message in messages %}
+    {{ message|safe }}
+{% endfor %}
 
 <form id="fset" method="post" enctype="multipart/form-data">{% csrf_token %}
     {{ formset.management_form }}

@@ -3,7 +3,7 @@
 
 {% block content %}
 {% for message in messages %}
-<h1>{{ message }}</h1>
+    {{ message|safe }}
 {% endfor %}
 <form method="post">{% csrf_token %}
 <p class="mt-2">
