@@ -2,10 +2,17 @@
 {% load static %}
 
 {% block content %}
+<a href="{% url 'kadent:patient_edit' patient_id %}" class="float-right">
+    <button class="btn btn-small btn-primary">Wróć do pacjenta</button>
+</a>
+
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Zapisz">
+    <input type="submit" value="Zapisz" class="btn btn-primary">
 </form>
 
-<a href="{% url 'kadent:image_create_from_visit' object.id %}">Dodaj obraz do tej wizyty</a>
+<a href="{% url 'kadent:image_create_from_visit' object.id %}" class="float-right">
+    <button class="btn btn-small btn-primary">Dodaj obraz do tej wizyty</button>
+</a>
 {% endblock content %}
+

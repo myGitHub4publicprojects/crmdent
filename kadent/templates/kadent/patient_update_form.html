@@ -6,7 +6,7 @@
     {{ message|safe }}
 {% endfor %}
 <form method="post">{% csrf_token %}
-<p class="mt-2">
+<p>
     <span>
     {{ form.first_name.errors }}
     {{ form.first_name.label_tag }}

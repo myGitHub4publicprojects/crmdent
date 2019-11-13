@@ -6,6 +6,10 @@
     {{ message|safe }}
 {% endfor %}
 
+<a href="{% url 'kadent:patient_edit' patient_id %}" class="float-right">
+    <button class="btn btn-small btn-primary">Wróć do pacjenta</button>
+</a>
+
 <form id="fset" method="post" enctype="multipart/form-data">{% csrf_token %}
     {{ formset.management_form }}
     <input type="file" name="images" accept="image/*" id="multiFileBtn" multiple>
