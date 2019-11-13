@@ -27,24 +27,46 @@ var totalForms = document.getElementById('id_form-TOTAL_FORMS');
 var output = document.getElementById('output');
 
 
+var preview = document.querySelector('img');
+
 multiFileBtn.addEventListener('change', ()=>{
     totalForms.value = multiFileBtn.files.length;
     for (let f of multiFileBtn.files){
-        var newP = document.createElement('p');
-        var newSpan = document.createElement('SPAN');
-        newSpan.innerText = f.name + ': ';
-        var newTextInput = document.createElement('INPUT');
-        newTextInput.type = 'text';
-        newTextInput.name = f.name;
-        newP.appendChild(newSpan);
-        newP.appendChild(newTextInput);
-        output.appendChild(newP);
+        var reader = new FileReader();
+        reader.addEventListener("load", function () {
+            preview.src = reader.result;
+            var image = new Image();
+            image.height = 100;
+            image.title = f.name;
+            image.src = this.result;
+
+            var newP = document.createElement('p');
+            var newSpan = document.createElement('SPAN');
+            newSpan.innerText = f.name + ': ';
+            var newTextInput = document.createElement('INPUT');
+            newTextInput.type = 'text';
+            newTextInput.name = f.name;
+        // newP.appendChild(newSpan);
+            newP.appendChild(image);
+            newP.appendChild(newTextInput);
+            output.appendChild(newP);
+        }, false);
+
+        if (f) {
+            reader.readAsDataURL(f);
+        }
     }
 });
 
 multiFileBtn.addEventListener('click',()=>{
     output.innerHTML = '';
 });
+
+
+//     <figure>
+//         <img src="pic_trulli.jpg" alt="Trulli" style="width:100%">
+//             <figcaption>Fig.1 - Trulli, Puglia, Italy.</figcaption>
+// </figure>
 
 </script>
 {% endblock %}

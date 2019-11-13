@@ -82,6 +82,7 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['formset'] = ImageFormSet(queryset=Image.objects.none())
+        context['patient_id'] = self.kwargs['pk']
         return context
 
     def post(self, request, *args, **kwargs):
