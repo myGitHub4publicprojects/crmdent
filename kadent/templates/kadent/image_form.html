@@ -34,22 +34,26 @@ multiFileBtn.addEventListener('change', ()=>{
     for (let f of multiFileBtn.files){
         var reader = new FileReader();
         reader.addEventListener("load", function () {
-            preview.src = reader.result;
             var image = new Image();
             image.height = 100;
             image.title = f.name;
             image.src = this.result;
 
-            var newP = document.createElement('p');
-            var newSpan = document.createElement('SPAN');
-            newSpan.innerText = f.name + ': ';
+            var newDiv = document.createElement('DIV');
+            var newFig = document.createElement('FIGURE');
+            newFig.classList.add("d-inline-block");
+            var newFigCaption = document.createElement('FIGCAPTION');
+            newFigCaption.innerText = f.name;
             var newTextInput = document.createElement('INPUT');
-            newTextInput.type = 'text';
-            newTextInput.name = f.name;
-        // newP.appendChild(newSpan);
-            newP.appendChild(image);
-            newP.appendChild(newTextInput);
-            output.appendChild(newP);
+            var hr = document.createElement('hr');
+
+            newFig.appendChild(image);
+            newFig.appendChild(newFigCaption);
+            newDiv.appendChild(newFig)
+            newDiv.appendChild(newTextInput)
+            output.appendChild(newDiv);
+            output.appendChild(hr);
+
         }, false);
 
         if (f) {
