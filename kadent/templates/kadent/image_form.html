@@ -15,7 +15,7 @@
     <input type="file" name="images" accept="image/*" id="multiFileBtn" multiple>
     <div id="output"></div>
 
-    <input type="submit" value="Zapisz">
+    <input id="formSubmit" type="submit" value="Zapisz">
 </form>
 {% endblock content %}
 
@@ -25,9 +25,8 @@ var multiFileBtn = document.getElementById('multiFileBtn');
 var fset = document.getElementById('fset');
 var totalForms = document.getElementById('id_form-TOTAL_FORMS');
 var output = document.getElementById('output');
+var formSubmit = document.getElementById('formSubmit');
 
-
-var preview = document.querySelector('img');
 
 multiFileBtn.addEventListener('change', ()=>{
     totalForms.value = multiFileBtn.files.length;
@@ -40,6 +39,14 @@ multiFileBtn.addEventListener('change', ()=>{
             image.src = this.result;
 
             var newDiv = document.createElement('DIV');
+            if (f.size < 1024){
+                newDiv.classList.add("alert");
+                newDiv.classList.add("alert-danger");
+                var sizeAlert = document.createElement('h3');
+                sizeAlert.innerText = 'Rozmiar pliku to: {0}B, dopuszczalne rozmiary: 1 kB - 20 MB'.replace('{0}', f.size)
+                newDiv.appendChild(sizeAlert);
+                formSubmit.disabled = true;
+            }
             var newFig = document.createElement('FIGURE');
             newFig.classList.add("d-inline-block");
             var newFigCaption = document.createElement('FIGCAPTION');
@@ -64,6 +71,7 @@ multiFileBtn.addEventListener('change', ()=>{
 
 multiFileBtn.addEventListener('click',()=>{
     output.innerHTML = '';
+    formSubmit.disabled = false;
 });
 
 
