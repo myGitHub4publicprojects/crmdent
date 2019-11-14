@@ -3,3 +3,7 @@ td a, td a:hover {
    color: azure;
    text-decoration: none;
 }
+
+#commonNote {
+    display: none;
+}

@@ -15,6 +15,10 @@
     <input type="file" name="images" accept="image/*" id="multiFileBtn" multiple>
     <div id="output"></div>
 
+    <div id="commonNote">
+        <label>Wspólna notatka do wszystkich obrazów:</label>
+        <input type="text" name="commonNote">
+    </div>
     <input id="formSubmit" type="submit" value="Zapisz">
 </form>
 {% endblock content %}
@@ -26,9 +30,14 @@ var fset = document.getElementById('fset');
 var totalForms = document.getElementById('id_form-TOTAL_FORMS');
 var output = document.getElementById('output');
 var formSubmit = document.getElementById('formSubmit');
+var commonNote = document.getElementById('commonNote');
 
 
 multiFileBtn.addEventListener('change', ()=>{
+    if (multiFileBtn.files.length > 1){
+        commonNote.style.display = 'block'
+
+    }
     totalForms.value = multiFileBtn.files.length;
     for (let f of multiFileBtn.files){
         var reader = new FileReader();

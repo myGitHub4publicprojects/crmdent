@@ -88,10 +88,13 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         counter = 0
         request.POST = request.POST.copy()
+        common_note = request.POST.get('commonNote', '')
+        if common_note:
+            common_note = ' ' + common_note
         for img in request.FILES.getlist('images'):
             request.FILES['form-{0}-file'.format(counter)] = img
             note = request.POST[img.name]
-            request.POST['form-{0}-note'.format(counter)] = note
+            request.POST['form-{0}-note'.format(counter)] = note + common_note
             counter += 1
         formset = ImageFormSet(self.request.POST, self.request.FILES)
         no_errors = True
