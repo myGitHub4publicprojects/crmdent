@@ -299,7 +299,7 @@ class TestImageCreateFromPatient(MyTestCase):
         expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
         self.assertEqual(messages[1].message, expected_error2)
         
-    def test_two_uncorrect_files(self):
+    def test_two_incorrect_files(self):
         '''should not create, two files, 0.8kB and 30MB'''
         self.client.login(username='john', password='glassonion')
         p = mixer.blend('kadent.Patient')
@@ -353,7 +353,7 @@ class TestImageCreateFromPatient(MyTestCase):
         expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
         self.assertEqual(messages[2].message, expected_error3)
 
-    def test_two_uncorrect_files_one_correct(self):
+    def test_two_incorrect_files_one_correct(self):
         '''should create one instance , three files, two incorrect: 0.8kB and 30MB'''
         self.client.login(username='john', password='glassonion')
         p = mixer.blend('kadent.Patient')
@@ -461,257 +461,256 @@ class TestImageCreateFromVisit(MyTestCase):
         # Image should relates to visit
         self.assertEqual(images.first().visit, v)
 
-    # def test_two_images_from_visit(self):
-    #     '''both images are 0.8MB and extension = .jpg'''
-    #     self.client.login(username='john', password='glassonion')
-    #     p = mixer.blend('kadent.Patient')
-    #     # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-    #     src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
-    #     shutil.copyfile(src, self.test_dir + '/08MB.jpg')
-    #     # create File
-    #     f = File(open(
-    #         self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     src2 = os.getcwd() + '/kadent/tests/test_files/08MB2.jpg'
-    #     shutil.copyfile(src2, self.test_dir + '/08MB2.jpg')
-    #     # create File
-    #     f2 = File(open(
-    #         self.test_dir + '/08MB2.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+    def test_two_images_from_visit(self):
+        '''both images are 0.8MB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        v = mixer.blend('kadent.Visit', patient=p)
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/08MB.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        src2 = os.getcwd() + '/kadent/tests/test_files/08MB2.jpg'
+        shutil.copyfile(src2, self.test_dir + '/08MB2.jpg')
+        # create File
+        f2 = File(open(
+            self.test_dir + '/08MB2.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
 
-    #     url = reverse('kadent:image_create_from_patient', args=(p.id,))
-    #     expected_url = reverse('kadent:patient_edit', args=(p.id,))
-    #     data = {
-    #         # formset management data
-    #         'form-TOTAL_FORMS': 2,
-    #         'form-INITIAL_FORMS': 0,
-    #         'form-MIN_NUM_FORMS': 0,
-    #         'form-MAX_NUM_FORMS': 1000,
+        url = reverse('kadent:image_create_from_visit', args=(v.id,))
+        expected_url = reverse('kadent:patient_edit', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
 
-    #         # test data
-    #         'images': [f, f2],
-    #         '08MB.jpg': 'test notęŁ',
-    #         '08MB2.jpg': '08MB2 test note'
-    #     }
-    #     response = self.client.post(url, data, follow=True)
+            # test data
+            'images': [f, f2],
+            '08MB.jpg': 'test notęŁ',
+            '08MB2.jpg': '08MB2 test note'
+        }
+        response = self.client.post(url, data, follow=True)
 
-    #     # should give code 200 as follow is set to True
-    #     assert response.status_code == 200
-    #     self.assertRedirects(response, expected_url,
-    #                          status_code=302, target_status_code=200)
-    #     images = Image.objects.all()
-    #     self.assertEqual(images.count(), 2)
-    #     self.assertEqual(images.first().note, 'test notęŁ')
-    #     self.assertEqual(images.last().note, '08MB2 test note')
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        self.assertEqual(images.count(), 2)
+        self.assertEqual(images.first().note, 'test notęŁ')
+        self.assertEqual(images.last().note, '08MB2 test note')
+        self.assertEqual(images.first().visit, v)
+        self.assertEqual(images.last().visit, v)
 
-    # def test_two_images_with_common_note_from_visit(self):
-    #     '''both images are 0.8MB and extension = .jpg'''
-    #     self.client.login(username='john', password='glassonion')
-    #     p = mixer.blend('kadent.Patient')
-    #     # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-    #     src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
-    #     shutil.copyfile(src, self.test_dir + '/08MB.jpg')
-    #     # create File
-    #     f = File(open(
-    #         self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     src2 = os.getcwd() + '/kadent/tests/test_files/08MB2.jpg'
-    #     shutil.copyfile(src2, self.test_dir + '/08MB2.jpg')
-    #     # create File
-    #     f2 = File(open(
-    #         self.test_dir + '/08MB2.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+    def test_two_images_with_common_note_from_visit(self):
+        '''both images are 0.8MB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        v = mixer.blend('kadent.Visit', patient=p)
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src, self.test_dir + '/08MB.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        src2 = os.getcwd() + '/kadent/tests/test_files/08MB2.jpg'
+        shutil.copyfile(src2, self.test_dir + '/08MB2.jpg')
+        # create File
+        f2 = File(open(
+            self.test_dir + '/08MB2.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
 
-    #     url = reverse('kadent:image_create_from_patient', args=(p.id,))
-    #     expected_url = reverse('kadent:patient_edit', args=(p.id,))
-    #     data = {
-    #         # formset management data
-    #         'form-TOTAL_FORMS': 2,
-    #         'form-INITIAL_FORMS': 0,
-    #         'form-MIN_NUM_FORMS': 0,
-    #         'form-MAX_NUM_FORMS': 1000,
+        url = reverse('kadent:image_create_from_visit', args=(v.id,))
+        expected_url = reverse('kadent:patient_edit', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
 
-    #         # test data
-    #         'images': [f, f2],
-    #         '08MB.jpg': 'test notęŁ',
-    #         '08MB2.jpg': '08MB2 test note',
-    #         'commonNote': 'Test common note.'
-    #     }
-    #     response = self.client.post(url, data, follow=True)
+            # test data
+            'images': [f, f2],
+            '08MB.jpg': 'test notęŁ',
+            '08MB2.jpg': '08MB2 test note',
+            'commonNote': 'Test common note.'
+        }
+        response = self.client.post(url, data, follow=True)
 
-    #     # should give code 200 as follow is set to True
-    #     assert response.status_code == 200
-    #     self.assertRedirects(response, expected_url,
-    #                          status_code=302, target_status_code=200)
-    #     images = Image.objects.all()
-    #     self.assertEqual(images.count(), 2)
-    #     self.assertEqual(images.first().note, 'test notęŁ Test common note.')
-    #     self.assertEqual(images.last().note,
-    #                      '08MB2 test note Test common note.')
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        self.assertEqual(images.count(), 2)
+        self.assertEqual(images.first().note, 'test notęŁ Test common note.')
+        self.assertEqual(images.last().note,
+                         '08MB2 test note Test common note.')
+        self.assertEqual(images.first().visit, v)
+        self.assertEqual(images.last().visit, v)
 
-    # def test_empty_file_from_visit(self):
-    #     '''should not create, one file, 0.8kB and extension = .jpg'''
-    #     self.client.login(username='john', password='glassonion')
-    #     p = mixer.blend('kadent.Patient')
-    #     # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-    #     src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
-    #     shutil.copyfile(src, self.test_dir + '/empty.jpg')
-    #     # create File
-    #     f = File(open(
-    #         self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     url = reverse('kadent:image_create_from_patient', args=(p.id,))
-    #     expected_url = reverse(
-    #         'kadent:image_create_from_patient', args=(p.id,))
-    #     data = {
-    #         # formset management data
-    #         'form-TOTAL_FORMS': 1,
-    #         'form-INITIAL_FORMS': 0,
-    #         'form-MIN_NUM_FORMS': 0,
-    #         'form-MAX_NUM_FORMS': 1000,
+    def test_empty_file_from_visit(self):
+        '''should not create, one file, 0.8kB and extension = .jpg'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        v = mixer.blend('kadent.Visit', patient=p)
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        url = reverse('kadent:image_create_from_visit', args=(v.id,))
+        expected_url = reverse(
+            'kadent:image_create_from_visit', args=(v.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
 
-    #         # test data
-    #         'images': [f, ],
-    #         'empty.jpg': 'test notęŁ'
-    #     }
-    #     response = self.client.post(url, data, follow=True)
+            # test data
+            'images': [f, ],
+            'empty.jpg': 'test notęŁ'
+        }
+        response = self.client.post(url, data, follow=True)
 
-    #     # should give code 200 as follow is set to True
-    #     assert response.status_code == 200
-    #     # should redisplay image form
-    #     self.assertRedirects(response, expected_url,
-    #                          status_code=302, target_status_code=200)
-    #     images = Image.objects.all()
-    #     # should not create an Image
-    #     self.assertEqual(images.count(), 0)
-    #     # should display error messages
-    #     messages = list(get_messages(response.wsgi_request))
-    #     # there should be 2 error messages
-    #     self.assertEqual(len(messages), 2)
-    #     # first should indicate that there was an error
-    #     expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
-    #     self.assertEqual(messages[0].message, expected_error1)
-    #     # second error should indicate the file and reason of failure
-    #     expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
-    #     self.assertEqual(messages[1].message, expected_error2)
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        # should redisplay image form
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        # should not create an Image
+        self.assertEqual(images.count(), 0)
+        # should display error messages
+        messages = list(get_messages(response.wsgi_request))
+        # there should be 2 error messages
+        self.assertEqual(len(messages), 2)
+        # first should indicate that there was an error
+        expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
+        self.assertEqual(messages[0].message, expected_error1)
+        # second error should indicate the file and reason of failure
+        expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
+        self.assertEqual(messages[1].message, expected_error2)
 
-    # def test_two_uncorrect_files_from_visit(self):
-    #     '''should not create, two files, 0.8kB and 30MB'''
-    #     self.client.login(username='john', password='glassonion')
-    #     p = mixer.blend('kadent.Patient')
-    #     # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-    #     src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
-    #     shutil.copyfile(src, self.test_dir + '/empty.jpg')
-    #     # create File
-    #     f = File(open(
-    #         self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+    def test_two_incorrect_files_from_visit(self):
+        '''should not create, two files, 0.8kB and 30MB'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        v = mixer.blend('kadent.Visit', patient=p)
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
 
-    #     src2 = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
-    #     shutil.copyfile(src2, self.test_dir + '/30MB.jpg')
-    #     f2 = File(open(
-    #         self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     url = reverse('kadent:image_create_from_patient', args=(p.id,))
-    #     expected_url = reverse(
-    #         'kadent:image_create_from_patient', args=(p.id,))
-    #     data = {
-    #         # formset management data
-    #         'form-TOTAL_FORMS': 2,
-    #         'form-INITIAL_FORMS': 0,
-    #         'form-MIN_NUM_FORMS': 0,
-    #         'form-MAX_NUM_FORMS': 1000,
+        src2 = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
+        shutil.copyfile(src2, self.test_dir + '/30MB.jpg')
+        f2 = File(open(
+            self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        url = reverse('kadent:image_create_from_visit', args=(p.id,))
+        expected_url = reverse(
+            'kadent:image_create_from_visit', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
 
-    #         # test data
-    #         'images': [f, f2],
-    #         'empty.jpg': 'test notęŁ',
-    #         '30MB.jpg': 'note for too large file'
-    #     }
-    #     response = self.client.post(url, data, follow=True)
+            # test data
+            'images': [f, f2],
+            'empty.jpg': 'test notęŁ',
+            '30MB.jpg': 'note for too large file'
+        }
+        response = self.client.post(url, data, follow=True)
 
-    #     # should give code 200 as follow is set to True
-    #     assert response.status_code == 200
-    #     # should redisplay image form
-    #     self.assertRedirects(response, expected_url,
-    #                          status_code=302, target_status_code=200)
-    #     images = Image.objects.all()
-    #     # should not create an Image
-    #     self.assertEqual(images.count(), 0)
-    #     # should display error messages
-    #     messages = list(get_messages(response.wsgi_request))
-    #     # there should be 3 error messages
-    #     self.assertEqual(len(messages), 3)
-    #     # first should indicate that there was an error
-    #     expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
-    #     self.assertEqual(messages[0].message, expected_error1)
-    #     # second error should indicate the file and reason of failure
-    #     expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
-    #     self.assertEqual(messages[1].message, expected_error2)
-    #     # third error should indicate the file and reason for failure
-    #     expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
-    #     self.assertEqual(messages[2].message, expected_error3)
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        # should redisplay image form
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        # should not create an Image
+        self.assertEqual(images.count(), 0)
+        # should display error messages
+        messages = list(get_messages(response.wsgi_request))
+        # there should be 3 error messages
+        self.assertEqual(len(messages), 3)
+        # first should indicate that there was an error
+        expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
+        self.assertEqual(messages[0].message, expected_error1)
+        # second error should indicate the file and reason of failure
+        expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
+        self.assertEqual(messages[1].message, expected_error2)
+        # third error should indicate the file and reason for failure
+        expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
+        self.assertEqual(messages[2].message, expected_error3)
 
-    # def test_two_uncorrect_files_one_correct_from_visit(self):
-    #     '''should create one instance , three files, two incorrect: 0.8kB and 30MB'''
-    #     self.client.login(username='john', password='glassonion')
-    #     p = mixer.blend('kadent.Patient')
-    #     # copy file to temp dir inside media to avoid SuspiciousFileOperation error
-    #     src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
-    #     shutil.copyfile(src, self.test_dir + '/empty.jpg')
-    #     # create File
-    #     f = File(open(
-    #         self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     src2 = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
-    #     shutil.copyfile(src2, self.test_dir + '/30MB.jpg')
-    #     f2 = File(open(
-    #         self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
-    #     src3 = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
-    #     shutil.copyfile(src3, self.test_dir + '/08M.jpg')
-    #     f3 = File(open(
-    #         self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+    def test_two_incorrect_files_one_correct_from_visit(self):
+        '''should create one instance , three files, two incorrect: 0.8kB and 30MB'''
+        self.client.login(username='john', password='glassonion')
+        p = mixer.blend('kadent.Patient')
+        v = mixer.blend('kadent.Visit', patient=p)
+        # copy file to temp dir inside media to avoid SuspiciousFileOperation error
+        src = os.getcwd() + '/kadent/tests/test_files/empty.jpg'
+        shutil.copyfile(src, self.test_dir + '/empty.jpg')
+        # create File
+        f = File(open(
+            self.test_dir + '/empty.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        src2 = os.getcwd() + '/kadent/tests/test_files/30MB.jpg'
+        shutil.copyfile(src2, self.test_dir + '/30MB.jpg')
+        f2 = File(open(
+            self.test_dir + '/30MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
+        src3 = os.getcwd() + '/kadent/tests/test_files/08MB.jpg'
+        shutil.copyfile(src3, self.test_dir + '/08M.jpg')
+        f3 = File(open(
+            self.test_dir + '/08MB.jpg', 'rb'))  # use 'rb' to read as bytes, no decoding
 
-    #     url = reverse('kadent:image_create_from_patient', args=(p.id,))
-    #     expected_url = reverse(
-    #         'kadent:image_create_from_patient', args=(p.id,))
-    #     data = {
-    #         # formset management data
-    #         'form-TOTAL_FORMS': 3,
-    #         'form-INITIAL_FORMS': 0,
-    #         'form-MIN_NUM_FORMS': 0,
-    #         'form-MAX_NUM_FORMS': 1000,
+        url = reverse('kadent:image_create_from_visit', args=(p.id,))
+        expected_url = reverse(
+            'kadent:image_create_from_visit', args=(p.id,))
+        data = {
+            # formset management data
+            'form-TOTAL_FORMS': 3,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
 
-    #         # test data
-    #         'images': [f, f2, f3],
-    #         'empty.jpg': 'test notęŁ',
-    #         '30MB.jpg': 'note for too large file',
-    #         '08MB.jpg': 'note for correct file'
-    #     }
-    #     response = self.client.post(url, data, follow=True)
+            # test data
+            'images': [f, f2, f3],
+            'empty.jpg': 'test notęŁ',
+            '30MB.jpg': 'note for too large file',
+            '08MB.jpg': 'note for correct file'
+        }
+        response = self.client.post(url, data, follow=True)
 
-    #     # should give code 200 as follow is set to True
-    #     assert response.status_code == 200
-    #     # should redisplay image form
-    #     self.assertRedirects(response, expected_url,
-    #                          status_code=302, target_status_code=200)
-    #     images = Image.objects.all()
-    #     # should not create an Image
-    #     self.assertEqual(images.count(), 0)
-    #     # should display error messages
-    #     messages = list(get_messages(response.wsgi_request))
-    #     # there should be 3 error messages
-    #     self.assertEqual(len(messages), 3)
-    #     # first should indicate that there was an error
-    #     expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
-    #     self.assertEqual(messages[0].message, expected_error1)
-    #     # second error should indicate the file and reason of failure
-    #     expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
-    #     self.assertEqual(messages[1].message, expected_error2)
-    #     # third error should indicate the file and reason for failure
-    #     expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
-    #     self.assertEqual(messages[2].message, expected_error3)
-
-
-
-
-
-
-
-
-
-
+        # should give code 200 as follow is set to True
+        assert response.status_code == 200
+        # should redisplay image form
+        self.assertRedirects(response, expected_url,
+                             status_code=302, target_status_code=200)
+        images = Image.objects.all()
+        # should not create an Image
+        self.assertEqual(images.count(), 0)
+        # should display error messages
+        messages = list(get_messages(response.wsgi_request))
+        # there should be 3 error messages
+        self.assertEqual(len(messages), 3)
+        # first should indicate that there was an error
+        expected_error1 = '''<div class="alert alert-danger" role="alert"><h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3></div>'''
+        self.assertEqual(messages[0].message, expected_error1)
+        # second error should indicate the file and reason of failure
+        expected_error2 = '<div class="alert alert-danger" role="alert">Plik empty.jpg jest pusty. Użyj pliku większego od 1kb</div>'
+        self.assertEqual(messages[1].message, expected_error2)
+        # third error should indicate the file and reason for failure
+        expected_error3 = '<div class="alert alert-danger" role="alert">Plik 30MB.jpg jest za duży. Użyj pliku o wielkości do 20MB</div>'
+        self.assertEqual(messages[2].message, expected_error3)
 
 
 

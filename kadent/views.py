@@ -169,7 +169,6 @@ class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
             return redirect('kadent:image_create_from_visit', self.kwargs['pk'])
 
     def form_valid(self, form, **kwargs):
-        print('here')
         visit = Visit.objects.get(id=self.kwargs['pk'])
         patient = visit.patient
         instances = form.save(commit=False)
