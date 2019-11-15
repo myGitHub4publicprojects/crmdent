@@ -25,7 +25,7 @@ urlpatterns = [
     path('<int:pk>/image_create_from_patient/',
          views.ImageCreateFromPatient.as_view(), name='image_create_from_patient'),
     path('<int:pk>/image_create_from_visit/',
-         views.ImageCreateFromPatient.as_view(), name='image_create_from_visit'),
+         views.ImageCreateFromVisit.as_view(), name='image_create_from_visit'),
     path('<int:pk>/image_edit/',
          views.ImageUpdate.as_view(), name='image_edit'),
 ]

@@ -127,18 +127,75 @@ class ImageCreateFromPatient(LoginRequiredMixin, CreateView):
 
 class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
     '''Create Image object when request send from VisitUpdate view'''
+    model = Image
+    fields = ['note', 'file']
 
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.uploaded_by = self.request.user
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['formset'] = ImageFormSet(queryset=Image.objects.none())
         visit = Visit.objects.get(id=self.kwargs['pk'])
-        obj.visit = visit
-        obj.patient = visit.patient
-        return super(ImageCreateFromVisit, self).form_valid(form)
+        patient = visit.patient
+        context['patient_id'] = patient.id
+        return context
 
-    def get_success_url(self):
+    def post(self, request, *args, **kwargs):
+        counter = 0
+        request.POST = request.POST.copy()
+        common_note = request.POST.get('commonNote', '')
+        if common_note:
+            common_note = ' ' + common_note
+        for img in request.FILES.getlist('images'):
+            request.FILES['form-{0}-file'.format(counter)] = img
+            note = request.POST[img.name]
+            request.POST['form-{0}-note'.format(counter)] = note + common_note
+            counter += 1
+        formset = ImageFormSet(self.request.POST, self.request.FILES)
+        no_errors = True
+        alert_div = '<div class="alert alert-danger" role="alert">{0}</div>'
+        if formset.is_valid():
+            print('here')
+            return self.form_valid(formset)
+        else:
+            if no_errors:
+                messages.info(
+                    request, alert_div.format(
+                        '<h2 class="text-center">Uwaga!</h2><h3>Wystąpiły następujące błędy:</h3>'
+                    )
+                )
+                no_errors = False
+            for errors_dicts in formset.errors:
+                for val in errors_dicts.values():
+                    messages.error(request, alert_div.format(val[0]))
+            return redirect('kadent:image_create_from_visit', self.kwargs['pk'])
+
+    def form_valid(self, form, **kwargs):
+        print('here')
         visit = Visit.objects.get(id=self.kwargs['pk'])
-        return reverse('kadent:visit_edit', args=(visit.id,))
+        patient = visit.patient
+        instances = form.save(commit=False)
+        for instance in instances:
+            instance.uploaded_by = self.request.user
+            instance.patient = patient
+            instance.visit = visit
+        form.save()
+        return redirect('kadent:patient_edit', patient.id)
+
+
+
+
+    # def form_valid(self, form):
+    #     obj = form.save(commit=False)
+    #     obj.uploaded_by = self.request.user
+    #     visit = Visit.objects.get(id=self.kwargs['pk'])
+    #     obj.visit = visit
+    #     obj.patient = visit.patient
+    #     return super(ImageCreateFromVisit, self).form_valid(form)
+
+    # def get_success_url(self):
+    #     visit = Visit.objects.get(id=self.kwargs['pk'])
+    #     return reverse('kadent:visit_edit', args=(visit.id,))
+
+
 
 class ImageUpdate(LoginRequiredMixin, UpdateView):
     model = Image
