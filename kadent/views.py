@@ -50,6 +50,11 @@ class VisitCreate(LoginRequiredMixin, CreateView):
     model = Visit
     fields = ['note']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['patient_id'] = self.kwargs['pk']
+        return context
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.doctor = self.request.user
@@ -153,7 +158,6 @@ class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
         no_errors = True
         alert_div = '<div class="alert alert-danger" role="alert">{0}</div>'
         if formset.is_valid():
-            print('here')
             return self.form_valid(formset)
         else:
             if no_errors:
@@ -177,23 +181,7 @@ class ImageCreateFromVisit(LoginRequiredMixin, CreateView):
             instance.patient = patient
             instance.visit = visit
         form.save()
-        return redirect('kadent:patient_edit', patient.id)
-
-
-
-
-    # def form_valid(self, form):
-    #     obj = form.save(commit=False)
-    #     obj.uploaded_by = self.request.user
-    #     visit = Visit.objects.get(id=self.kwargs['pk'])
-    #     obj.visit = visit
-    #     obj.patient = visit.patient
-    #     return super(ImageCreateFromVisit, self).form_valid(form)
-
-    # def get_success_url(self):
-    #     visit = Visit.objects.get(id=self.kwargs['pk'])
-    #     return reverse('kadent:visit_edit', args=(visit.id,))
-
+        return redirect('kadent:visit_edit', visit.id)
 
 
 class ImageUpdate(LoginRequiredMixin, UpdateView):

@@ -56,11 +56,21 @@ multiFileBtn.addEventListener('change', ()=>{
                 newDiv.appendChild(sizeAlert);
                 formSubmit.disabled = true;
             }
+            if (f.size > 20 * 1024 *1024) {
+                newDiv.classList.add("alert");
+                newDiv.classList.add("alert-danger");
+                var sizeAlert = document.createElement('h3');
+                var fileSizeInMB = Math.round((f.size / (1024 * 1024)) * 10 )/10
+                sizeAlert.innerText = 'Rozmiar pliku to: {0}MB, dopuszczalne rozmiary: 1 kB - 20 MB'.replace('{0}', fileSizeInMB)
+                newDiv.appendChild(sizeAlert);
+                formSubmit.disabled = true;
+            }
             var newFig = document.createElement('FIGURE');
             newFig.classList.add("d-inline-block");
             var newFigCaption = document.createElement('FIGCAPTION');
             newFigCaption.innerText = f.name;
             var newTextInput = document.createElement('INPUT');
+            newTextInput.name = f.name;
             var hr = document.createElement('hr');
 
             newFig.appendChild(image);
