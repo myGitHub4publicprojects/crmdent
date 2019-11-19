@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+import os
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
-from django.core.validators import FileExtensionValidator
 
-from .validators import accepted_size
+from .validators import accepted_size, accepted_extensions
 
 class Patient(models.Model):
     first_name = models.CharField(max_length=120)
@@ -39,8 +39,8 @@ class Image(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.ImageField(
         upload_to='documents/',
-        validators=[accepted_size,
-                    FileExtensionValidator(allowed_extensions=['jpg', 'png'])])
+        validators=[accepted_size, accepted_extensions]
+        )
     note = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
@@ -50,3 +50,6 @@ class Image(models.Model):
 
     def get_absolute_url(self):
         return reverse('kadent:image_edit', kwargs={'pk': self.pk})
+
+    def filename(self):
+        return os.path.basename(self.file.name)
