@@ -3,13 +3,21 @@
 
 {% block content %}
 <h1>Pacjenci</h1>
-<ul>
-    {% for patient in object_list %}
-    <li>
-        <a href="{% url 'kadent:patient_edit' patient.id %}">{{ patient }}</a>
-    </li>
-    {% empty %}
-    <li>Nie ma jeszcze pacjentów.</li>
-    {% endfor %}
-</ul>
+
+<table class="table table-hover table-dark">
+    <thead>
+        <tr>
+            <th scope="col">imię i nazwisko</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for patient in object_list %}
+        <tr>
+            <td><a href="{% url 'kadent:patient_edit' patient.id %}">{{ patient }}</a></td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
 {% endblock content %}

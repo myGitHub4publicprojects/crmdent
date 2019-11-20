@@ -189,5 +189,11 @@ class ImageUpdate(LoginRequiredMixin, UpdateView):
     fields = ['note']
     template_name_suffix = '_update_form'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        image = Image.objects.get(id=self.kwargs['pk'])
+        context['patient_id'] = image.patient.id
+        return context
+
     def get_initial(self):
         return {'note': self.object.note}

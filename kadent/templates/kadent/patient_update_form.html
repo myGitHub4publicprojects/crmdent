@@ -65,7 +65,7 @@
     <tbody>
         {% for image in images %}
         <tr>
-            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.file.name }}</a></td>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.filename }}</a></td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_at|date:'d.m.Y H:i' }}</a></td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.note }}</a></td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_by }}</a></td>
