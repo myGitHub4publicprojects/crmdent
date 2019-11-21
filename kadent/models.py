@@ -5,6 +5,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from .validators import accepted_size, accepted_extensions
+from .utils import make_thumbnail
 
 class Patient(models.Model):
     first_name = models.CharField(max_length=120)
@@ -41,6 +42,8 @@ class Image(models.Model):
         upload_to='documents/',
         validators=[accepted_size, accepted_extensions]
         )
+    thumbnail = models.ImageField(
+        upload_to='', editable=False, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
@@ -53,3 +56,14 @@ class Image(models.Model):
 
     def filename(self):
         return os.path.basename(self.file.name)
+
+
+
+    def save(self, *args, **kwargs):
+        # save for image
+        super().save(*args, **kwargs)
+
+        make_thumbnail(self.thumbnail, self.file, (200, 200))
+
+        # save for thumbnail
+        super().save(*args, **kwargs)
