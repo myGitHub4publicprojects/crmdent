@@ -2,17 +2,57 @@
 {% load static %}
 
 {% block content %}
-<a href="{% url 'kadent:patient_edit' patient_id %}" class="float-right">
-    <button class="btn btn-small btn-primary">Wróć do pacjenta</button>
-</a>
 
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Zapisz" class="btn btn-primary">
-</form>
 
-<a href="{% url 'kadent:image_create_from_visit' object.id %}" class="float-right">
-    <button class="btn btn-small btn-primary">Dodaj obraz do tej wizyty</button>
-</a>
+
+
+<div class="row">
+    <div class="col-lg-4">
+        <form method="post">{% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Zapisz" class="btn btn-primary">
+        </form>
+    </div>
+    <div class="col-lg-8">
+        
+
+        <div class="row justify-content-end">
+
+            <div class="col-lg">
+                <a href="{% url 'kadent:patient_edit' patient_id %}" class="float-right mb-3">
+                    <button class="btn btn-small btn-primary">Wróć do pacjenta</button>
+                </a>
+            </div>
+            <div class="w-100"></div>
+
+
+            {% for i in images %}
+                <div class="col-lg">
+                    <figure class="figure">
+                        <img src="{{ i.thumbnail.url }}" alt="{{ i.filename }}" class="figure-img">
+                        <figcaption class="figure-caption text-center">{{ i.filename }}</figcaption>
+                    </figure>
+                </div>
+
+                {% if forloop.counter|divisibleby:"3" %}
+                <div class="w-100"></div>
+                {% endif %}
+
+            {% endfor %}
+
+            <div class="col-lg">
+                <a href="{% url 'kadent:image_create_from_visit' object.id %}" class="float-right mt-3">
+                    <button class="btn btn-small btn-primary">Dodaj obraz do tej wizyty</button>
+                </a>
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
+
+
 {% endblock content %}
 

@@ -57,8 +57,6 @@ class Image(models.Model):
     def filename(self):
         return os.path.basename(self.file.name)
 
-
-
     def save(self, *args, **kwargs):
         # save for image
         super().save(*args, **kwargs)
