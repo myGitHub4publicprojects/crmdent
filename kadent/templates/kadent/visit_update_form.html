@@ -10,13 +10,19 @@
     <div class="col-lg-4">
         <form method="post">{% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" value="Zapisz" class="btn btn-primary">
+            <input type="submit" value="Zapisz" class="btn btn-primary mb-2">
         </form>
     </div>
     <div class="col-lg-8">
         
 
         <div class="row justify-content-end">
+
+            <div class="col-lg">
+                <a href="{% url 'kadent:image_create_from_visit' object.id %}" class="float-left mb-3">
+                    <button class="btn btn-small btn-primary">Dodaj obraz do tej wizyty</button>
+                </a>
+            </div>
 
             <div class="col-lg">
                 <a href="{% url 'kadent:patient_edit' patient_id %}" class="float-right mb-3">
@@ -27,11 +33,18 @@
 
 
             {% for i in images %}
-                <div class="col-lg">
-                    <figure class="figure">
+                <div class="col-xl">
+                    <a href="{% url 'kadent:image_edit' i.id %}">
+                    <figure class="figure border">
                         <img src="{{ i.thumbnail.url }}" alt="{{ i.filename }}" class="figure-img">
-                        <figcaption class="figure-caption text-center">{{ i.filename }}</figcaption>
+                        <figcaption class="figure-caption text-center">
+                            {{ i.filename }}
+                            {% if i.note %}
+                                <p>{{ i.note }}</p>
+                            {% endif %}
+                        </figcaption>
                     </figure>
+                    </a>
                 </div>
 
                 {% if forloop.counter|divisibleby:"3" %}
@@ -39,12 +52,6 @@
                 {% endif %}
 
             {% endfor %}
-
-            <div class="col-lg">
-                <a href="{% url 'kadent:image_create_from_visit' object.id %}" class="float-right mt-3">
-                    <button class="btn btn-small btn-primary">Dodaj obraz do tej wizyty</button>
-                </a>
-            </div>
 
         </div>
 
