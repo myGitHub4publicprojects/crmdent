@@ -27,6 +27,9 @@
 </form>
 
 <h3 class="text-center">Wizyty</h3>
+<a href="{% url 'kadent:visit_create' object.id %}">
+    <button class="btn btn-small btn-primary">Dodaj wizytę do pacjenta</button>
+</a>
 <table class="table table-hover table-dark">
     <thead>
         <tr>
@@ -46,13 +49,13 @@
 
     </tbody>
 </table>
-<a href="{% url 'kadent:visit_create' object.id %}">
-    <button class="btn btn-small btn-primary">Dodaj wizytę do pacjenta</button>
-</a>
 
 <hr>
 
 <h3 class="text-center">Obrazy</h3>
+<a href="{% url 'kadent:image_create_from_patient' object.id %}">
+    <button class="btn btn-small btn-primary">Dodaj obraz do pacjenta</button>
+</a>
 <table class="table table-hover table-dark">
     <thead>
         <tr>
@@ -65,7 +68,10 @@
     <tbody>
         {% for image in images %}
         <tr>
-            <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.filename }}</a></td>
+            <td><a href="{% url 'kadent:image_edit' image.id %}">
+                <img src="{{ image.thumbnail.url }}" alt="{{ image.filename }}" class="figure-img"> 
+                </a>
+            </td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_at|date:'d.m.Y H:i' }}</a></td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.note }}</a></td>
             <td><a href="{% url 'kadent:image_edit' image.id %}">{{ image.uploaded_by }}</a></td>
@@ -75,8 +81,5 @@
     </tbody>
 </table>
 
-<a href="{% url 'kadent:image_create_from_patient' object.id %}">
-    <button class="btn btn-small btn-primary">Dodaj obraz do pacjenta</button>
-</a>
 
 {% endblock content %}

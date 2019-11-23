@@ -3,8 +3,8 @@
 
 {% block content %}
 
-
-
+<h4 class="text-center">Pacjent: {{ object.patient }}</h4>
+<h4>Wizyta u {{ object.doctor }}, {{ object.timestamp|date:'d.m.Y H:i' }}</h4>
 
 <div class="row">
     <div class="col-lg-4">
