@@ -118,3 +118,8 @@ MAX_UPLOAD_SIZE = 20*1024*1024
 MIN_UPLOAD_SIZE = 1024
 
 ACCEPTED_EXTENSIONS = ['jpg', 'jpeg', 'png']
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
